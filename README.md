@@ -1,4 +1,3 @@
-# dnd-party-dashboard
 <!DOCTYPE html>
 <html lang="en">
 <head>
