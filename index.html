@@ -25,6 +25,21 @@
     .charHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.avatar{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:1.8rem;background:linear-gradient(135deg,var(--accent2),var(--accent));box-shadow:0 10px 20px rgba(217,70,239,.25)}
     button{font:inherit}.toggle{width:100%;text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);border-radius:16px;padding:12px;margin-top:10px;cursor:pointer;font-weight:850}.toggle:hover{background:rgba(255,255,255,.1)}.hidden{display:none}.noteArea, input, textarea{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:12px;font:inherit}textarea{min-height:110px}.toolRow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.primary{border:0;background:linear-gradient(135deg,var(--accent2),var(--accent));color:white;border-radius:14px;padding:10px 13px;font-weight:900;cursor:pointer}.ghost{border:1px solid var(--line);background:rgba(255,255,255,.06);color:white;border-radius:14px;padding:10px 13px;font-weight:800;cursor:pointer}.danger{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.4)}
     ul,ol{padding-left:22px;line-height:1.55}.search{margin:0 0 14px}.callout{border-left:5px solid var(--accent);padding:12px 14px;background:rgba(217,70,239,.12);border-radius:14px}.mini{font-size:.9rem;color:var(--muted)}.footer{padding:20px;text-align:center;color:var(--muted)}
+
+    .roleGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:12px}
+    @media(max-width:1000px){.roleGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:600px){.roleGrid{grid-template-columns:1fr}}
+    .roleCard{border:1px solid var(--line);border-radius:18px;padding:14px;background:rgba(255,255,255,.06)}
+    .roleCard h3{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .roleCard.eilrys{border-color:rgba(34,197,94,.55);background:linear-gradient(180deg,rgba(34,197,94,.16),rgba(255,255,255,.05))}
+    .roleCard.zo{border-color:rgba(168,85,247,.65);background:linear-gradient(180deg,rgba(168,85,247,.18),rgba(255,255,255,.05))}
+    .roleCard.kenshi{border-color:rgba(132,204,22,.55);background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(132,204,22,.09))}
+    .roleCard.evangeline{border-color:rgba(236,72,153,.65);background:linear-gradient(180deg,rgba(236,72,153,.18),rgba(255,255,255,.05))}
+    .roleCard.lixie{border-color:rgba(239,68,68,.65);background:linear-gradient(180deg,rgba(239,68,68,.18),rgba(255,255,255,.05))}
+    .ruleTag{display:inline-flex;border-radius:999px;padding:5px 9px;margin:3px;background:rgba(255,255,255,.08);border:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+    .decision{border-left:5px solid var(--warn);padding:12px 14px;background:rgba(245,158,11,.10);border-radius:14px}
+    .goodbox{border-left:5px solid var(--good);padding:12px 14px;background:rgba(34,197,94,.10);border-radius:14px}
+
   </style>
 </head>
 <body>
@@ -59,9 +74,70 @@ function addLoot(){const n=document.getElementById('lootItem').value.trim(); if(
 document.getElementById('home').innerHTML=`<div class="grid grid2"><div class="card"><h2>Party Identity</h2><p>This party is strongest when it scouts first, controls space, and deletes priority targets before enemies can swarm the fragile backline.</p><div class="callout"><b>Big strength:</b> ambush + exploration.<br><b>Big weakness:</b> no true tank, so positioning matters.</div></div><div class="card"><h2>Default Marching Order</h2><ol><li>Zo + Eilrys scout carefully ahead.</li><li>Kenshi stays ready to intercept.</li><li>Lixie and Evangeline stay protected and mobile.</li></ol></div></div><div class="grid grid2" style="margin-top:14px"><div class="card"><h2>Ambush Plan A: Glow & Delete</h2><ol><li>Zo and Eilrys scout first.</li><li>Eilrys or Lixie casts Faerie Fire.</li><li>Zo Sneak Attacks with advantage.</li><li>Evangeline bursts the priority target.</li><li>Kenshi charges survivors.</li></ol></div><div class="card"><h2>Ambush Plan B: Root & Shoot</h2><ol><li>Lixie opens with Entangle.</li><li>Eilrys and Zo fire from range.</li><li>Evangeline slows or bursts.</li><li>Kenshi guards the edge and punishes escapees.</li></ol></div></div>`;
 document.getElementById('characters').innerHTML=`<input class="search" id="search" placeholder="Search spell, skill, character, role..." oninput="filterChars()"> <div class="grid">${party.map(charCard).join('')}</div>`;
 function filterChars(){const q=document.getElementById('search').value.toLowerCase();document.querySelectorAll('.char').forEach(c=>c.style.display=c.dataset.search.includes(q)?'block':'none')}
-document.getElementById('turn').innerHTML=`<div class="grid grid3"><div class="card"><h2>Every Turn Ask</h2><ol><li>What is my Action?</li><li>Do I have a Bonus Action?</li><li>Where should I move?</li><li>Can I use cover?</li><li>Can enemies reach me?</li></ol></div><div class="card"><h2>If You Are Eilrys</h2><ol><li>Multiple enemies? Faerie Fire.</li><li>One big target? Hunter’s Mark.</li><li>Enemy rushing ally? Slow or Thorn Whip.</li><li>Before checks? Guidance.</li></ol></div><div class="card"><h2>Emergency Buttons</h2><ul><li>Healing Word: ranged pickup.</li><li>Cure Wounds: touch heal.</li><li>Thunderwave: create space.</li><li>Fog Cloud: retreat/protection.</li><li>Magic Missile: reliable finish.</li></ul></div></div>`;
+document.getElementById('turn').innerHTML=`
+<div class="grid grid2">
+  <div class="card">
+    <h2>What Should I Do On My Turn?</h2>
+    <div class="decision"><b>Use this when you freeze.</b> Pick the first option that applies.</div>
+    <ol>
+      <li><b>Is someone down?</b> If you can heal, pick them up first.</li>
+      <li><b>Are you about to get hit?</b> Move, use cover, Dodge, or Disengage.</li>
+      <li><b>Is there a party target?</b> Focus fire that same enemy.</li>
+      <li><b>Are enemies grouped up?</b> Use control or area spells like Faerie Fire, Entangle, Thunderwave, Ice Knife, or Fog Cloud if escape is needed.</li>
+      <li><b>Nothing special?</b> Use your safest reliable attack and stay near the party.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h2>New Player Panic Button</h2>
+    <ul>
+      <li><b>Attack</b> the enemy everyone else is attacking.</li>
+      <li><b>Move to cover</b> if you are squishy or being targeted.</li>
+      <li><b>Help</b> an ally if they are trying something important.</li>
+      <li><b>Dodge</b> if you are surrounded and scared.</li>
+      <li><b>Ask:</b> “Who needs help right now?”</li>
+    </ul>
+    <div class="goodbox"><b>Golden rule:</b> Stay useful, stay alive, and do not run off alone.</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <h2>Role Guide For Everyone</h2>
+  <p class="mini">Use your character color/theme to find yourself quickly.</p>
+  <div class="roleGrid">
+    <div class="roleCard eilrys"><h3>🌲 Eilrys Winterpath</h3><ul><li>Scout with Zo.</li><li>Use Longbow from range.</li><li>Use Hunter’s Mark on one big target.</li><li>Use Faerie Fire when enemies are grouped.</li><li>Use Guidance before important checks.</li></ul></div>
+    <div class="roleCard zo"><h3>🌙 Zion / Zo</h3><ul><li>Look for traps, ambushes, and secrets.</li><li>Try to start hidden.</li><li>Use Sneak Attack when possible.</li><li>Attack enemies next to allies.</li><li>Use social skills when talking matters.</li></ul></div>
+    <div class="roleCard kenshi"><h3>🐉 Kenshi of the Kuro Ryu Clan</h3><ul><li>Pressure dangerous enemies.</li><li>Block paths to protect casters.</li><li>Use Greatsword for main damage.</li><li>Use Acid Breath on grouped enemies.</li><li>Do not run too far ahead alone.</li></ul></div>
+    <div class="roleCard evangeline"><h3>🌸 Evangeline</h3><ul><li>Stay away from melee.</li><li>Use Mage Armor before danger.</li><li>Use Magic Missile when you need a reliable hit.</li><li>Use Ray of Frost to slow enemies.</li><li>Use utility magic for clues and problems.</li></ul></div>
+    <div class="roleCard lixie"><h3>🌹 Lixie</h3><ul><li>Use Entangle when enemies rush or group up.</li><li>Use Healing Word when someone drops.</li><li>Use Thunderwave if surrounded.</li><li>Use Goodberry before travel.</li><li>Use Detect Magic/Speak with Animals for clues.</li></ul></div>
+  </div>
+</div>
+
+<div class="grid grid3" style="margin-top:14px">
+  <div class="card"><h2>Before Ending Your Turn</h2><ol><li>Did I use my Action?</li><li>Do I have a Bonus Action?</li><li>Am I in cover or too exposed?</li><li>Am I concentrating on a spell?</li><li>Can an enemy reach me next turn?</li></ol></div>
+  <div class="card"><h2>Emergency Buttons</h2><ul><li><b>Healing Word:</b> ranged pickup for a downed ally.</li><li><b>Cure Wounds:</b> stronger touch heal.</li><li><b>Thunderwave:</b> push enemies away.</li><li><b>Fog Cloud:</b> escape or block sight.</li><li><b>Magic Missile:</b> reliable finisher.</li><li><b>Disengage:</b> leave melee safely.</li><li><b>Dodge:</b> harder to hit until your next turn.</li></ul></div>
+  <div class="card"><h2>Common Beginner Mistakes</h2><ul><li>Splitting damage across too many enemies.</li><li>Running ahead alone.</li><li>Standing next to enemies as a caster.</li><li>Forgetting concentration.</li><li>Forgetting movement after attacking.</li><li>Using Fog Cloud when allies need line of sight.</li></ul></div>
+</div>
+
+<div class="grid grid2" style="margin-top:14px">
+  <div class="card"><h2>Party Synergy</h2><ul><li><b>Eilrys + Zo:</b> scout team. Find threats before they find you.</li><li><b>Lixie + Eilrys:</b> control team. Restrain, reveal, slow, and kite enemies.</li><li><b>Kenshi + control spells:</b> let enemies get trapped, then punish them.</li><li><b>Evangeline + party focus fire:</b> burst or finish the priority target.</li><li><b>Everyone:</b> call the target, focus fire, and protect the backline.</li></ul></div>
+  <div class="card"><h2>Combat Conversation Starters</h2><ul><li>“Who are we focusing?”</li><li>“Can I get Sneak Attack here?”</li><li>“Should I control them or attack?”</li><li>“Is anyone about to go down?”</li><li>“Can they reach our casters?”</li><li>“Do I have advantage or cover?”</li></ul></div>
+</div>`;
 document.getElementById('tools').innerHTML=`<div class="grid grid2"><div class="card"><h2>Initiative Tracker</h2><div class="toolRow"><input id="initName" placeholder="Name"><input id="initVal" placeholder="Initiative"></div><button class="primary" onclick="addInit()">Add</button><ol id="initList"></ol></div><div class="card"><h2>Loot Tracker</h2><div class="toolRow"><input id="lootItem" placeholder="Gold, item, clue, potion..."></div><button class="primary" onclick="addLoot()">Add Loot</button><ul id="lootList"></ul></div><div class="card"><h2>Session Notes</h2><textarea id="notes" placeholder="Type notes here. They save on this device only."></textarea><div class="toolRow"><button class="primary" onclick="save('notes','notes')">Save Notes</button><button class="ghost" onclick="load('notes','notes')">Load Notes</button><button class="ghost danger" onclick="localStorage.removeItem('notes');notes.value=''">Clear</button></div></div><div class="card"><h2>Quest Log</h2><textarea id="quests" placeholder="Active quests, NPC names, mysteries..."></textarea><div class="toolRow"><button class="primary" onclick="save('quests','quests')">Save Quests</button><button class="ghost" onclick="load('quests','quests')">Load Quests</button><button class="ghost danger" onclick="localStorage.removeItem('quests');quests.value=''">Clear</button></div></div></div>`;
-document.getElementById('rules').innerHTML=`<div class="grid grid2"><div class="card"><h2>Study First</h2><ol><li>Action, Bonus Action, Movement, Reaction</li><li>Concentration: only one at a time</li><li>Stealth and surprise</li><li>Cover and line of sight</li><li>Conditions: Restrained, Prone, Grappled, Invisible</li><li>Opportunity attacks</li><li>Target priority</li></ol></div><div class="card"><h2>Kill Order</h2><ol><li>Enemy casters</li><li>Archers/ranged threats</li><li>Fast enemies that can reach backline</li><li>Enemy leaders</li><li>Heavy melee last unless blocking you</li></ol><div class="callout">Focus fire. Spreading damage usually makes fights harder.</div></div></div>`;
+document.getElementById('rules').innerHTML=`
+<div class="grid grid2">
+  <div class="card"><h2>New to D&D? Study This First</h2><ol><li><b>Action:</b> your main thing: Attack, Cast a Spell, Dash, Dodge, Help, Hide, Search, or Disengage.</li><li><b>Bonus Action:</b> only if something says it uses one, like Hunter’s Mark, Healing Word, Telekinetic Shove, or some features.</li><li><b>Movement:</b> you can move before and after your action.</li><li><b>Reaction:</b> one response outside your turn, often Opportunity Attack or Absorb Elements.</li><li><b>Concentration:</b> only one concentration spell at a time.</li></ol></div>
+  <div class="card"><h2>Kill Order</h2><ol><li>Enemy casters or healers.</li><li>Archers/ranged threats.</li><li>Fast enemies rushing the backline.</li><li>Enemy leaders or buffers.</li><li>Heavy melee enemies last unless they are blocking you.</li></ol><div class="callout">Focus fire. Spreading damage usually makes fights harder.</div></div>
+</div>
+<div class="grid grid3" style="margin-top:14px">
+  <div class="card"><h2>Advantage / Disadvantage</h2><p><b>Advantage:</b> roll 2 d20 and keep the higher.</p><p><b>Disadvantage:</b> roll 2 d20 and keep the lower.</p><div class="ruleTag">Hiding can help</div><div class="ruleTag">Faerie Fire can help</div><div class="ruleTag">Being blinded can hurt</div></div>
+  <div class="card"><h2>Concentration</h2><p>You can only concentrate on one spell at a time.</p><ul><li>Hunter’s Mark, Faerie Fire, Entangle, Fog Cloud, Guidance, Dancing Lights, and Beast Bond use concentration.</li><li>If you cast a new concentration spell, the old one ends.</li><li>If you take damage, you may need to roll to keep it.</li></ul></div>
+  <div class="card"><h2>Opportunity Attacks</h2><p>If you walk away from an enemy you are in melee with, they may hit you with a reaction.</p><ul><li><b>Disengage</b> prevents this.</li><li><b>Teleporting/pushing</b> usually avoids it.</li><li><b>Forced movement</b> usually does not trigger it.</li></ul></div>
+</div>
+<div class="grid grid2" style="margin-top:14px">
+  <div class="card"><h2>Common Actions in Plain English</h2><ul><li><b>Attack:</b> make a weapon attack.</li><li><b>Cast a Spell:</b> use a spell or cantrip.</li><li><b>Dash:</b> move farther.</li><li><b>Disengage:</b> leave melee safely.</li><li><b>Dodge:</b> enemies have a harder time hitting you.</li><li><b>Help:</b> give an ally advantage on something.</li><li><b>Hide:</b> try to become unseen.</li><li><b>Search:</b> look for hidden things.</li><li><b>Ready:</b> prepare an action for a trigger.</li></ul></div>
+  <div class="card"><h2>Useful Conditions</h2><ul><li><b>Restrained:</b> movement becomes 0; attacks against them are easier.</li><li><b>Prone:</b> melee attacks against them are easier; ranged attacks are harder.</li><li><b>Grappled:</b> movement becomes 0.</li><li><b>Invisible:</b> harder to target.</li><li><b>Charmed:</b> affects social/control situations.</li><li><b>Frightened:</b> makes it harder for enemies to approach or attack well.</li></ul></div>
+</div>
+<div class="card" style="margin-top:14px"><h2>Table Reminder</h2><div class="goodbox"><b>Good teamwork beats perfect rules knowledge.</b> Tell the group what you are trying to do, ask who needs help, and focus one enemy at a time.</div></div>`;
 load('notes','notes');load('quests','quests');
 </script>
 </body>
