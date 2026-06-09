@@ -1,483 +1,370 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D Party Cheat Sheet</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+import React, { useMemo, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, BowArrow, Sparkles, Shield, Eye, HeartPulse, Swords, Wand2, Leaf, Skull, MoveRight, Users } from "lucide-react";
+import { motion } from "framer-motion";
+
+const party = [
+  {
+    name: "Eilrys Winterpath",
+    player: "Chila",
+    species: "Wood Elf",
+    classLevel: "Ranger 1",
+    role: "Tactical Support Sniper",
+    vibe: "Scout • Skirmisher • Control • Emergency Heal",
+    ac: 16,
+    hp: 13,
+    speed: "35 ft",
+    initiative: "+4",
+    passive: "15",
+    stats: { STR: 10, DEX: 18, CON: 16, INT: 14, WIS: 17, CHA: 15 },
+    saves: ["STR +2", "DEX +6"],
+    skills: ["Stealth +6", "Perception +5", "Survival +5", "Insight +5", "Investigation +4", "Nature +4"],
+    attacks: ["Longbow +6, 1d8+4 piercing, Slow", "Thorn Whip +5, 1d6 piercing, pull", "Scimitar backup"],
+    spells: ["Guidance", "Thorn Whip", "Druidcraft", "Cure Wounds", "Speak with Animals", "Faerie Fire", "Hunter’s Mark"],
+    bestAt: ["Opening ambushes", "Slowing enemies", "Scouting with Zo", "Buffing checks with Guidance", "Emergency healing"],
+    cheat: {
+      opening: "If there are multiple enemies, open with Faerie Fire. If there is one big threat, use Hunter’s Mark then longbow.",
+      combat: "Stay at range, use cover, slow enemies with Longbow mastery, and protect the backline by controlling movement.",
+      utility: "Cast Guidance constantly before important skill checks: tracking, stealth, investigation, persuasion, climbing, survival.",
+      avoid: "Do not stand in melee unless necessary. Do not overlap concentration with Hunter’s Mark/Faerie Fire." 
     }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #3b0764, #0f172a 45%, #020617);
-      color: #f8fafc;
-      min-height: 100vh;
-      padding: 24px;
+  },
+  {
+    name: "Zion / Zo",
+    player: "Tabba",
+    species: "Human",
+    classLevel: "Rogue 1",
+    role: "Scout & Skill Specialist",
+    vibe: "Perception Monster • Face • Trap Finder • Sneak Attack",
+    ac: 15,
+    hp: 11,
+    speed: "30 ft",
+    initiative: "+6",
+    passive: "18",
+    stats: { STR: 12, DEX: 18, CON: 16, INT: 14, WIS: 18, CHA: 16 },
+    saves: ["DEX +6", "INT +4"],
+    skills: ["Perception +8 expertise", "Persuasion +7 expertise", "Acrobatics +6", "Animal Handling +6", "Insight +6", "Survival +6"],
+    attacks: ["Light Crossbow +6, 1d8+4 piercing, Slow", "Shortsword +6, 1d6+4 piercing, Vex", "Daggers +6, 1d4+4 piercing, Nick", "Sneak Attack +1d6"],
+    spells: [],
+    bestAt: ["Finding ambushes", "Starting fights early", "Social checks", "Sneak Attack damage", "Trap/secret detection"],
+    cheat: {
+      opening: "Scout first with Eilrys. Start combat hidden when possible. Target enemies already engaged with allies to trigger Sneak Attack.",
+      combat: "Use ranged attacks safely, or strike with finesse weapons when an ally is adjacent to the enemy.",
+      utility: "Take point when searching rooms, noticing hidden creatures, reading people, or talking the party through social tension.",
+      avoid: "Do not get isolated. Sneak Attack is once per turn, so accuracy and positioning matter more than attacking randomly." 
     }
-
-    .page {
-      max-width: 1200px;
-      margin: 0 auto;
+  },
+  {
+    name: "Kenshi of the Kuro Ryu Clan",
+    player: "Umar",
+    species: "Black Dragonborn",
+    classLevel: "Ranger 1",
+    role: "Frontline Striker",
+    vibe: "Greatsword • Shock Trooper • Breath Weapon • Pressure",
+    ac: 16,
+    hp: 12,
+    speed: "30 ft",
+    initiative: "+2",
+    passive: "14",
+    stats: { STR: 18, DEX: 14, CON: 14, INT: 8, WIS: 14, CHA: 10 },
+    saves: ["STR +6", "DEX +4"],
+    skills: ["Athletics +6", "Insight +4", "Perception +4", "Stealth +4", "Nature +1"],
+    attacks: ["Greatsword +6, 2d6+4 slashing, Graze", "Longbow +4, 1d8+2 piercing, Slow", "Acid Breath Weapon, DC 12 Dex, 1d10 acid"],
+    spells: ["Zephyr Strike", "Cure Wounds", "Hunter’s Mark"],
+    bestAt: ["Punishing trapped enemies", "Blocking escape routes", "Bursting into melee", "Greatsword pressure", "Acid resistance situations"],
+    cheat: {
+      opening: "Wait for Eilrys/Lixie to control enemies, then charge the most vulnerable or dangerous target.",
+      combat: "Use Greatsword for main damage. Use Zephyr Strike when you need to move safely or reach a priority enemy.",
+      utility: "Use Athletics for climbing, forcing doors, grappling, or physical obstacles.",
+      avoid: "Do not assume you are an immortal tank. You are tough, but the party still needs control and positioning." 
     }
-
-    .hero {
-      background: linear-gradient(135deg, rgba(236,72,153,.18), rgba(99,102,241,.18));
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 28px;
-      padding: 28px;
-      margin-bottom: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  },
+  {
+    name: "Evangeline",
+    player: "Nina",
+    species: "Fairy",
+    classLevel: "Wizard 1",
+    role: "Arcane Damage & Utility",
+    vibe: "Flying Wizard • Burst Damage • Telekinetic Control",
+    ac: 12,
+    hp: 9,
+    speed: "30 ft walk / 30 ft fly",
+    initiative: "+2",
+    passive: "12",
+    stats: { STR: 12, DEX: 14, CON: 16, INT: 18, WIS: 14, CHA: 14 },
+    saves: ["INT +6", "WIS +4"],
+    skills: ["Arcana +6", "Deception +4", "Medicine +4", "Sleight of Hand +4", "Investigation +4"],
+    attacks: ["Ray of Frost +6, 1d8 cold, slow", "Chromatic Orb +6", "Magic Missile auto-hit"],
+    spells: ["Prestidigitation", "Ray of Frost", "Dancing Lights", "Mage Hand", "Druidcraft", "Mage Armor", "Chromatic Orb", "Comprehend Languages", "Magic Missile"],
+    bestAt: ["Magical burst", "Finishing targets", "Arcana checks", "Flying reposition", "Telekinetic shove tricks"],
+    cheat: {
+      opening: "Cast Mage Armor before danger if possible. In combat, use Magic Missile to finish evasive targets or Chromatic Orb for burst.",
+      combat: "Fly or reposition away from melee. Use Ray of Frost to slow threats and Telekinetic shove to move allies/enemies 5 ft.",
+      utility: "Use Comprehend Languages for ancient writing, strange speech, and dungeon clues.",
+      avoid: "Do not stand near the frontline. Your power is high, but your HP and AC are low." 
     }
-
-    .eyebrow {
-      color: #f0abfc;
-      text-transform: uppercase;
-      letter-spacing: .16em;
-      font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 10px;
+  },
+  {
+    name: "Lixie",
+    player: "Amanda",
+    species: "Fairy",
+    classLevel: "Druid 1",
+    role: "Support Controller",
+    vibe: "Healing Word • Entangle • Goodberry • Nature Magic",
+    ac: 14,
+    hp: 12,
+    speed: "30 ft walk / 30 ft fly",
+    initiative: "+3",
+    passive: "24",
+    stats: { STR: 16, DEX: 16, CON: 18, INT: 15, WIS: 18, CHA: 14 },
+    saves: ["INT +4", "WIS +6"],
+    skills: ["Passive Perception 24", "Passive Investigation 22", "Insight +6", "Survival +6", "Stealth +5", "Athletics +5"],
+    attacks: ["Primal Savagery +6, 1d10 acid", "Produce Flame +6, 1d8 fire", "Quarterstaff +5, 1d6+3 bludgeoning"],
+    spells: ["Healing Word", "Thunderwave", "Entangle", "Goodberry", "Fog Cloud", "Faerie Fire", "Absorb Elements", "Longstrider", "Ice Knife", "Detect Magic", "Speak with Animals"],
+    bestAt: ["Battlefield control", "Bonus action healing", "Prepared survival", "Detecting danger", "Restraining groups"],
+    cheat: {
+      opening: "If enemies are grouped or rushing, Entangle is excellent. If an ally drops, Healing Word from range is the emergency button.",
+      combat: "Control space first, then attack. Thunderwave can push enemies away if surrounded.",
+      utility: "Goodberry before travel, Detect Magic in suspicious places, Speak with Animals for scouting clues.",
+      avoid: "Do not cast Fog Cloud over enemies your allies need to shoot unless it is for escape or protection." 
     }
+  }
+];
 
-    h1 {
-      font-size: clamp(34px, 6vw, 72px);
-      line-height: .95;
-      margin-bottom: 14px;
-    }
+const teamCheats = [
+  {
+    title: "Ambush Plan A: Glow & Delete",
+    icon: Sparkles,
+    steps: ["Zo and Eilrys scout first.", "Eilrys or Lixie casts Faerie Fire on grouped enemies.", "Zo attacks with Sneak Attack advantage.", "Evangeline uses Chromatic Orb or Magic Missile on the priority target.", "Kenshi charges anything that survives or tries to escape."],
+    bestFor: "Groups, hidden enemies, high-AC enemies, night fights"
+  },
+  {
+    title: "Ambush Plan B: Root & Shoot",
+    icon: Leaf,
+    steps: ["Lixie opens with Entangle at a chokepoint.", "Eilrys and Zo fire from range.", "Evangeline slows with Ray of Frost or bursts a key target.", "Kenshi holds the edge of the trap zone and punishes escapees."],
+    bestFor: "Melee enemies, narrow terrain, forests, ruins, bridges"
+  },
+  {
+    title: "Protect the Backline",
+    icon: Shield,
+    steps: ["If enemies rush Evangeline or Lixie, Eilrys uses Longbow Slow or Thorn Whip.", "Lixie uses Thunderwave if surrounded.", "Evangeline flies/repositions and uses Telekinetic shove.", "Kenshi intercepts the biggest melee threat."],
+    bestFor: "Wolves, fast monsters, assassins, surprise melee rushes"
+  },
+  {
+    title: "Boss Focus Fire",
+    icon: Skull,
+    steps: ["Pick one priority target and call it out.", "Eilrys uses Hunter’s Mark unless Faerie Fire is more valuable.", "Zo attacks when Sneak Attack is available.", "Evangeline uses burst spells when hit chance is good or Magic Missile when reliability matters.", "Kenshi stays on the boss or blocks its path."],
+    bestFor: "Single dangerous monsters, enemy leaders, casters"
+  }
+];
 
-    .subtitle {
-      color: #cbd5e1;
-      max-width: 760px;
-      font-size: 17px;
-      line-height: 1.6;
-    }
+const studyTopics = [
+  "Action economy: Action, Bonus Action, Movement, Reaction",
+  "Concentration: only one concentration spell at a time",
+  "Stealth and surprise: when hiding works and how ambushes start",
+  "Cover: half cover, three-quarters cover, full cover",
+  "Conditions: Restrained, Prone, Grappled, Frightened, Invisible, Charmed",
+  "Line of sight: who can see whom and what blocks targeting",
+  "Opportunity attacks: when leaving melee is dangerous",
+  "Target priority: casters, archers, fast enemies, then tanks",
+  "Chokepoints: doors, bridges, hallways, stairs",
+  "Retreat tactics: Dash, Disengage, slowing enemies, covering allies"
+];
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
+function StatPill({ label, value }) {
+  return (
+    <div className="rounded-xl border bg-white/70 px-3 py-2 text-center shadow-sm">
+      <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="font-bold text-slate-900">{value}</div>
+    </div>
+  );
+}
 
-    input, button {
-      border: 0;
-      border-radius: 999px;
-      padding: 13px 18px;
-      font: inherit;
-    }
+function CharacterCard({ c }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+      <Card className="overflow-hidden rounded-2xl border-slate-200 bg-white/90 shadow-md">
+        <CardContent className="p-0">
+          <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-fuchsia-950 p-5 text-white">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-black tracking-tight">{c.name}</h2>
+                <p className="text-sm text-fuchsia-100">{c.player} • {c.species} • {c.classLevel}</p>
+              </div>
+              <Badge className="bg-white/15 text-white hover:bg-white/20">{c.role}</Badge>
+            </div>
+            <p className="mt-3 text-sm text-slate-200">{c.vibe}</p>
+          </div>
 
-    input {
-      flex: 1;
-      min-width: 230px;
-      background: rgba(255,255,255,.92);
-      color: #0f172a;
-    }
+          <div className="grid gap-4 p-5 lg:grid-cols-[1fr_1.2fr]">
+            <div className="space-y-4">
+              <div className="grid grid-cols-5 gap-2">
+                <StatPill label="AC" value={c.ac} />
+                <StatPill label="HP" value={c.hp} />
+                <StatPill label="Init" value={c.initiative} />
+                <StatPill label="Passive" value={c.passive} />
+                <StatPill label="Speed" value={c.speed} />
+              </div>
 
-    button {
-      cursor: pointer;
-      background: rgba(255,255,255,.12);
-      color: white;
-      border: 1px solid rgba(255,255,255,.18);
-      font-weight: 700;
-      transition: .2s ease;
-    }
+              <div>
+                <h3 className="mb-2 flex items-center gap-2 font-bold"><Swords className="h-4 w-4" /> Ability Scores</h3>
+                <div className="grid grid-cols-6 gap-2">
+                  {Object.entries(c.stats).map(([k, v]) => <StatPill key={k} label={k} value={v} />)}
+                </div>
+              </div>
 
-    button:hover, button.active {
-      background: #ec4899;
-      transform: translateY(-1px);
-    }
+              <div>
+                <h3 className="mb-2 flex items-center gap-2 font-bold"><Eye className="h-4 w-4" /> Skills to Remember</h3>
+                <div className="flex flex-wrap gap-2">
+                  {c.skills.map((s) => <Badge key={s} variant="secondary" className="rounded-full">{s}</Badge>)}
+                </div>
+              </div>
+            </div>
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 18px;
-      margin-bottom: 28px;
-    }
+            <div className="space-y-4">
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <h3 className="mb-2 flex items-center gap-2 font-bold"><BowArrow className="h-4 w-4" /> Attacks / Core Actions</h3>
+                <ul className="list-inside list-disc space-y-1 text-sm text-slate-700">
+                  {c.attacks.map((a) => <li key={a}>{a}</li>)}
+                </ul>
+              </div>
 
-    .card {
-      background: rgba(255,255,255,.94);
-      color: #0f172a;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 18px 45px rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.2);
-    }
+              {c.spells.length > 0 && (
+                <div className="rounded-2xl bg-indigo-50 p-4">
+                  <h3 className="mb-2 flex items-center gap-2 font-bold"><Wand2 className="h-4 w-4" /> Spells / Magic</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {c.spells.map((s) => <Badge key={s} className="rounded-full bg-indigo-900 hover:bg-indigo-800">{s}</Badge>)}
+                  </div>
+                </div>
+              )}
 
-    .card-top {
-      background: linear-gradient(135deg, #111827, #4c1d95, #831843);
-      color: white;
-      padding: 20px;
-    }
+              <div className="rounded-2xl bg-fuchsia-50 p-4">
+                <h3 className="mb-2 flex items-center gap-2 font-bold"><Sparkles className="h-4 w-4" /> Quick Cheat Sheet</h3>
+                <div className="space-y-2 text-sm text-slate-700">
+                  <p><strong>Opening:</strong> {c.cheat.opening}</p>
+                  <p><strong>Combat:</strong> {c.cheat.combat}</p>
+                  <p><strong>Utility:</strong> {c.cheat.utility}</p>
+                  <p><strong>Avoid:</strong> {c.cheat.avoid}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
 
-    .card h2 {
-      font-size: 25px;
-      margin-bottom: 6px;
-    }
+export default function DnDPartyCheatSheet() {
+  const [query, setQuery] = useState("");
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return party.filter((c) => [c.name, c.player, c.species, c.classLevel, c.role, c.vibe, ...c.skills, ...c.attacks, ...c.spells].join(" ").toLowerCase().includes(q));
+  }, [query]);
 
-    .meta {
-      color: #e9d5ff;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50 to-fuchsia-100 p-4 text-slate-950 md:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <motion.header initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl bg-slate-950 p-6 text-white shadow-xl md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="mb-2 flex items-center gap-2 text-fuchsia-200"><Users className="h-5 w-5" /> Level 1 Party Dashboard</div>
+              <h1 className="text-4xl font-black tracking-tight md:text-6xl">Ambush Party Cheat Sheet</h1>
+              <p className="mt-3 max-w-3xl text-slate-300">A tactical webpage for Eilrys, Zo, Kenshi, Evangeline, and Lixie — built around scouting, ambushes, control, mobility, and quick decision-making at the table.</p>
+            </div>
+            <div className="rounded-2xl bg-white/10 p-4 text-sm text-slate-200">
+              <p><strong>Party identity:</strong> mobile tactical skirmishers</p>
+              <p><strong>Big strength:</strong> ambush + exploration</p>
+              <p><strong>Big weakness:</strong> no true tank</p>
+            </div>
+          </div>
+        </motion.header>
 
-    .role {
-      display: inline-block;
-      background: rgba(255,255,255,.14);
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 999px;
-      padding: 7px 12px;
-      font-size: 13px;
-      font-weight: 800;
-    }
+        <Tabs defaultValue="characters" className="space-y-5">
+          <TabsList className="grid h-auto grid-cols-2 rounded-2xl bg-white/80 p-1 shadow-sm md:grid-cols-4">
+            <TabsTrigger value="characters" className="rounded-xl">Characters</TabsTrigger>
+            <TabsTrigger value="ambush" className="rounded-xl">Ambush Plans</TabsTrigger>
+            <TabsTrigger value="study" className="rounded-xl">Study List</TabsTrigger>
+            <TabsTrigger value="quick" className="rounded-xl">Quick Rules</TabsTrigger>
+          </TabsList>
 
-    .card-body {
-      padding: 20px;
-    }
+          <TabsContent value="characters" className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <Input className="rounded-2xl bg-white/90 pl-9" placeholder="Search character, spell, skill, role..." value={query} onChange={(e) => setQuery(e.target.value)} />
+            </div>
+            <div className="space-y-5">
+              {filtered.map((c) => <CharacterCard key={c.name} c={c} />)}
+            </div>
+          </TabsContent>
 
-    .stat-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-    }
+          <TabsContent value="ambush" className="grid gap-4 md:grid-cols-2">
+            {teamCheats.map((plan) => {
+              const Icon = plan.icon;
+              return (
+                <Card key={plan.title} className="rounded-2xl bg-white/90 shadow-md">
+                  <CardContent className="p-5">
+                    <div className="mb-3 flex items-center gap-3">
+                      <div className="rounded-2xl bg-slate-950 p-3 text-white"><Icon className="h-5 w-5" /></div>
+                      <div>
+                        <h2 className="text-xl font-black">{plan.title}</h2>
+                        <p className="text-sm text-slate-500">Best for: {plan.bestFor}</p>
+                      </div>
+                    </div>
+                    <ol className="space-y-2 text-sm text-slate-700">
+                      {plan.steps.map((s, i) => (
+                        <li key={s} className="flex gap-2"><span className="font-bold text-fuchsia-700">{i + 1}.</span>{s}</li>
+                      ))}
+                    </ol>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
 
-    .stat {
-      background: #f1f5f9;
-      border-radius: 14px;
-      padding: 10px;
-      text-align: center;
-    }
+          <TabsContent value="study" className="space-y-4">
+            <Card className="rounded-2xl bg-white/90 shadow-md">
+              <CardContent className="p-5">
+                <h2 className="mb-2 text-2xl font-black">What to Study First</h2>
+                <p className="mb-4 text-sm text-slate-600">Do not study the whole rulebook first. Study the rules that affect your character’s decisions every session.</p>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {studyTopics.map((topic, i) => (
+                    <div key={topic} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
+                      <Badge className="bg-fuchsia-900">{i + 1}</Badge>
+                      <span className="text-sm font-medium">{topic}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-    .stat span {
-      display: block;
-      color: #64748b;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-weight: 800;
-    }
-
-    .stat strong {
-      font-size: 18px;
-    }
-
-    .section {
-      margin-top: 16px;
-    }
-
-    .section h3 {
-      font-size: 15px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: #581c87;
-      margin-bottom: 8px;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-    }
-
-    .tag {
-      background: #ede9fe;
-      color: #4c1d95;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    ul {
-      padding-left: 18px;
-      color: #334155;
-      line-height: 1.55;
-      font-size: 14px;
-    }
-
-    .cheat {
-      background: #fff1f2;
-      border-left: 5px solid #ec4899;
-      padding: 14px;
-      border-radius: 16px;
-      color: #334155;
-      line-height: 1.55;
-      font-size: 14px;
-    }
-
-    .panel {
-      background: rgba(255,255,255,.92);
-      color: #0f172a;
-      border-radius: 24px;
-      padding: 22px;
-      margin-bottom: 22px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.28);
-    }
-
-    .panel h2 {
-      font-size: 28px;
-      margin-bottom: 14px;
-    }
-
-    .plans {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-    }
-
-    .plan {
-      background: #f8fafc;
-      border-radius: 20px;
-      padding: 16px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .plan h3 {
-      margin-bottom: 8px;
-      color: #831843;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    @media (max-width: 520px) {
-      body {
-        padding: 14px;
-      }
-
-      .hero, .panel, .card-body, .card-top {
-        padding: 16px;
-      }
-
-      .stat-row {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-  </style>
-</head>
-<body>
-  <main class="page">
-    <section class="hero">
-      <div class="eyebrow">D&D Party Dashboard</div>
-      <h1>Ambush Party Cheat Sheet</h1>
-      <p class="subtitle">
-        A simple, clean webpage for Eilrys, Zo, Kenshi, Evangeline, and Lixie. Built for quick reference during sessions: roles, spells, strengths, and what to do in common combat situations.
-      </p>
-    </section>
-
-    <section class="controls">
-      <input id="search" type="text" placeholder="Search character, spell, role, skill..." />
-      <button class="active" data-filter="all">All</button>
-      <button data-filter="scout">Scout</button>
-      <button data-filter="damage">Damage</button>
-      <button data-filter="support">Support</button>
-      <button data-filter="control">Control</button>
-    </section>
-
-    <section id="characters" class="grid"></section>
-
-    <section class="panel">
-      <h2>Team Ambush Plans</h2>
-      <div class="plans">
-        <div class="plan">
-          <h3>Glow & Delete</h3>
-          <ul>
-            <li>Eilrys or Lixie casts Faerie Fire.</li>
-            <li>Zo attacks with Sneak Attack.</li>
-            <li>Evangeline bursts the priority target.</li>
-            <li>Kenshi charges survivors.</li>
-          </ul>
-        </div>
-        <div class="plan">
-          <h3>Root & Shoot</h3>
-          <ul>
-            <li>Lixie opens with Entangle.</li>
-            <li>Eilrys and Zo shoot from range.</li>
-            <li>Evangeline slows or finishes enemies.</li>
-            <li>Kenshi blocks escape routes.</li>
-          </ul>
-        </div>
-        <div class="plan">
-          <h3>Protect the Backline</h3>
-          <ul>
-            <li>Eilrys slows with Longbow or Thorn Whip.</li>
-            <li>Lixie uses Thunderwave if surrounded.</li>
-            <li>Evangeline flies away or uses Telekinetic shove.</li>
-            <li>Kenshi intercepts the biggest threat.</li>
-          </ul>
-        </div>
-        <div class="plan">
-          <h3>Boss Focus Fire</h3>
-          <ul>
-            <li>Pick one target and call it out.</li>
-            <li>Eilrys uses Hunter’s Mark.</li>
-            <li>Zo attacks when Sneak Attack is available.</li>
-            <li>Everyone avoids spreading damage too thin.</li>
-          </ul>
-        </div>
+          <TabsContent value="quick" className="grid gap-4 md:grid-cols-3">
+            <Card className="rounded-2xl bg-white/90 shadow-md">
+              <CardContent className="p-5">
+                <h2 className="mb-2 flex items-center gap-2 text-xl font-black"><MoveRight className="h-5 w-5" /> Every Turn</h2>
+                <p className="text-sm text-slate-700">Ask: What is my Action? Bonus Action? Movement? Reaction? Can I use cover? Can enemies reach me?</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl bg-white/90 shadow-md">
+              <CardContent className="p-5">
+                <h2 className="mb-2 flex items-center gap-2 text-xl font-black"><HeartPulse className="h-5 w-5" /> Emergency Buttons</h2>
+                <p className="text-sm text-slate-700">Healing Word picks allies up at range. Cure Wounds works in touch range. Thunderwave creates space. Fog Cloud can cover retreat.</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl bg-white/90 shadow-md">
+              <CardContent className="p-5">
+                <h2 className="mb-2 flex items-center gap-2 text-xl font-black"><Skull className="h-5 w-5" /> Kill Order</h2>
+                <p className="text-sm text-slate-700">Usually target enemy casters first, then archers, then fast enemies, then heavy melee enemies. Focus fire instead of spreading damage.</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </section>
-
-    <section class="panel">
-      <h2>What to Study First</h2>
-      <ul>
-        <li><strong>Action economy:</strong> Action, Bonus Action, Movement, Reaction.</li>
-        <li><strong>Concentration:</strong> only one concentration spell at a time.</li>
-        <li><strong>Stealth and surprise:</strong> how ambushes actually begin.</li>
-        <li><strong>Cover:</strong> half cover, three-quarters cover, full cover.</li>
-        <li><strong>Conditions:</strong> restrained, prone, grappled, invisible, frightened, charmed.</li>
-        <li><strong>Target priority:</strong> casters, archers, fast enemies, then bulky melee enemies.</li>
-      </ul>
-    </section>
-  </main>
-
-  <script>
-    const party = [
-      {
-        name: "Eilrys Winterpath",
-        player: "Chila",
-        species: "Wood Elf",
-        classLevel: "Ranger 1",
-        role: "Tactical Support Sniper",
-        type: "scout control support damage",
-        ac: 16,
-        hp: 13,
-        init: "+4",
-        passive: 15,
-        vibe: "Scout • Skirmisher • Control • Emergency Heal",
-        skills: ["Stealth +6", "Perception +5", "Survival +5", "Insight +5", "Investigation +4", "Nature +4"],
-        actions: ["Longbow +6, 1d8+4 piercing, Slow", "Thorn Whip +5, pull enemy", "Hunter’s Mark for single-target damage", "Faerie Fire for ambush advantage", "Guidance before important checks"],
-        cheat: "Open with Faerie Fire if there are multiple enemies. Use Hunter’s Mark for one big threat. Stay at range, use cover, slow enemies, and protect the backline."
-      },
-      {
-        name: "Zion / Zo",
-        player: "Tabba",
-        species: "Human",
-        classLevel: "Rogue 1",
-        role: "Scout & Skill Specialist",
-        type: "scout damage",
-        ac: 15,
-        hp: 11,
-        init: "+6",
-        passive: 18,
-        vibe: "Perception Monster • Face • Trap Finder • Sneak Attack",
-        skills: ["Perception +8", "Persuasion +7", "Acrobatics +6", "Insight +6", "Survival +6", "Animal Handling +6"],
-        actions: ["Light Crossbow +6", "Shortsword +6", "Daggers with Nick", "Sneak Attack +1d6", "Alert initiative swap"],
-        cheat: "Scout with Eilrys. Start hidden when possible. Attack enemies near allies to trigger Sneak Attack. You are the party’s eyes and social specialist."
-      },
-      {
-        name: "Kenshi of the Kuro Ryu Clan",
-        player: "Umar",
-        species: "Black Dragonborn",
-        classLevel: "Ranger 1",
-        role: "Frontline Striker",
-        type: "damage control",
-        ac: 16,
-        hp: 12,
-        init: "+2",
-        passive: 14,
-        vibe: "Greatsword • Shock Trooper • Breath Weapon • Pressure",
-        skills: ["Athletics +6", "Insight +4", "Perception +4", "Stealth +4", "Nature +1"],
-        actions: ["Greatsword +6, 2d6+4 slashing", "Acid Breath Weapon", "Zephyr Strike", "Hunter’s Mark", "Longbow backup"],
-        cheat: "Wait for control spells, then charge the dangerous target. You hit hard, but you are not an immortal tank. Use Zephyr Strike to reposition safely."
-      },
-      {
-        name: "Evangeline",
-        player: "Nina",
-        species: "Fairy",
-        classLevel: "Wizard 1",
-        role: "Arcane Damage & Utility",
-        type: "damage control support",
-        ac: 12,
-        hp: 9,
-        init: "+2",
-        passive: 12,
-        vibe: "Flying Wizard • Burst Damage • Telekinetic Control",
-        skills: ["Arcana +6", "Deception +4", "Medicine +4", "Sleight of Hand +4", "Investigation +4"],
-        actions: ["Magic Missile", "Chromatic Orb", "Ray of Frost", "Mage Armor", "Telekinetic shove", "Comprehend Languages"],
-        cheat: "Cast Mage Armor before danger. Stay away from melee. Use Magic Missile for reliable finishing damage and Ray of Frost to slow threats."
-      },
-      {
-        name: "Lixie",
-        player: "Amanda",
-        species: "Fairy",
-        classLevel: "Druid 1",
-        role: "Support Controller",
-        type: "support control scout",
-        ac: 14,
-        hp: 12,
-        init: "+3",
-        passive: 24,
-        vibe: "Healing Word • Entangle • Goodberry • Nature Magic",
-        skills: ["Passive Perception 24", "Passive Investigation 22", "Insight +6", "Survival +6", "Stealth +5", "Athletics +5"],
-        actions: ["Entangle", "Healing Word", "Thunderwave", "Goodberry", "Fog Cloud", "Absorb Elements", "Detect Magic"],
-        cheat: "Open with Entangle when enemies group up. Healing Word is the emergency pick-up button. Use Goodberry before travel and Detect Magic in suspicious places."
-      }
-    ];
-
-    const container = document.getElementById("characters");
-    const search = document.getElementById("search");
-    const buttons = document.querySelectorAll("button[data-filter]");
-    let activeFilter = "all";
-
-    function render() {
-      const q = search.value.toLowerCase();
-      container.innerHTML = "";
-
-      party
-        .filter(c => activeFilter === "all" || c.type.includes(activeFilter))
-        .filter(c => JSON.stringify(c).toLowerCase().includes(q))
-        .forEach(c => {
-          const card = document.createElement("article");
-          card.className = "card";
-          card.innerHTML = `
-            <div class="card-top">
-              <h2>${c.name}</h2>
-              <p class="meta">${c.player} • ${c.species} • ${c.classLevel}</p>
-              <span class="role">${c.role}</span>
-            </div>
-            <div class="card-body">
-              <p><strong>${c.vibe}</strong></p>
-              <div class="stat-row">
-                <div class="stat"><span>AC</span><strong>${c.ac}</strong></div>
-                <div class="stat"><span>HP</span><strong>${c.hp}</strong></div>
-                <div class="stat"><span>Init</span><strong>${c.init}</strong></div>
-                <div class="stat"><span>Passive</span><strong>${c.passive}</strong></div>
-              </div>
-              <div class="section">
-                <h3>Best Skills</h3>
-                <div class="tags">${c.skills.map(s => `<span class="tag">${s}</span>`).join("")}</div>
-              </div>
-              <div class="section">
-                <h3>Core Actions</h3>
-                <ul>${c.actions.map(a => `<li>${a}</li>`).join("")}</ul>
-              </div>
-              <div class="section">
-                <h3>Cheat Sheet</h3>
-                <div class="cheat">${c.cheat}</div>
-              </div>
-            </div>
-          `;
-          container.appendChild(card);
-        });
-    }
-
-    search.addEventListener("input", render);
-
-    buttons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        buttons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        activeFilter = btn.dataset.filter;
-        render();
-      });
-    });
-
-    render();
-  </script>
-</body>
-</html>
+    </div>
+  );
+}
