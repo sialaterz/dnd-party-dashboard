@@ -73,6 +73,12 @@
     .sheetGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px}
     @media(max-width:700px){.sheetGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
+
+    .campaignGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+    @media(max-width:800px){.campaignGrid{grid-template-columns:1fr}}
+    .tinyInput{min-height:70px}
+    .campaignTip{font-size:.85rem;color:var(--muted);margin-top:6px}
+
   </style>
 </head>
 <body>
@@ -111,7 +117,7 @@ function toggle(id){document.getElementById(id).classList.toggle('hidden')}
 function save(key,id){localStorage.setItem(key,document.getElementById(id).value)}function load(key,id){document.getElementById(id).value=localStorage.getItem(key)||''}
 function addInit(){const n=document.getElementById('initName').value.trim(), v=document.getElementById('initVal').value.trim(); if(!n)return; const li=document.createElement('li'); li.innerHTML=`<b>${v||'?'}:</b> ${n} <button class="ghost danger" onclick="this.parentElement.remove()">remove</button>`; document.getElementById('initList').appendChild(li); document.getElementById('initName').value=''; document.getElementById('initVal').value='';}
 function addLoot(){const n=document.getElementById('lootItem').value.trim(); if(!n)return; const li=document.createElement('li'); li.innerHTML=`${n} <button class="ghost danger" onclick="this.parentElement.remove()">remove</button>`; document.getElementById('lootList').appendChild(li); document.getElementById('lootItem').value='';}
-document.getElementById('home').innerHTML=`<div class="grid grid2"><div class="card"><h2>Party Identity</h2><p>This party is strongest when it scouts first, controls space, and deletes priority targets before enemies can swarm the fragile backline.</p><div class="callout"><b>Big strength:</b> ambush + exploration.<br><b>Big weakness:</b> no true tank, so positioning matters.</div></div><div class="card"><h2>Default Marching Order</h2><ol><li>Zo + Eilrys scout carefully ahead.</li><li>Kenshi stays ready to intercept.</li><li>Lixie and Evangeline stay protected and mobile.</li></ol></div></div><div class="grid grid2" style="margin-top:14px"><div class="card"><h2>Ambush Plan A: Glow & Delete</h2><ol><li>Zo and Eilrys scout first.</li><li>Eilrys or Lixie casts Faerie Fire.</li><li>Zo Sneak Attacks with advantage.</li><li>Evangeline bursts the priority target.</li><li>Kenshi charges survivors.</li></ol></div><div class="card"><h2>Ambush Plan B: Root & Shoot</h2><ol><li>Lixie opens with Entangle.</li><li>Eilrys and Zo fire from range.</li><li>Evangeline slows or bursts.</li><li>Kenshi guards the edge and punishes escapees.</li></ol></div></div>`;
+document.getElementById('home').innerHTML=`<div class="grid grid2"><div class="card"><h2>Party Identity</h2><p>This party is strongest when it scouts first, controls space, and deletes priority targets before enemies can swarm the fragile backline.</p><div class="callout"><b>Big strength:</b> ambush + exploration.<br><b>Big weakness:</b> no true tank, so positioning matters.</div></div><div class="card"><h2>Campaign Progress</h2><p><b>Current Party Level:</b> 1</p><p><b>Sessions Played:</b> <span id="sessionCount">0</span></p><p><b>Current Objective:</b> <span id="homeObjective">TBD</span></p><div class="toolRow"><button class="ghost" onclick="show('tools')">Open Campaign Tools</button></div><p class="mini">Update details in Session Tools. This keeps the Home page simple and quick.</p></div></div><div class="grid grid2" style="margin-top:14px"><div class="card"><h2>Default Marching Order</h2><ol><li>Zo + Eilrys scout carefully ahead.</li><li>Kenshi stays ready to intercept.</li><li>Lixie and Evangeline stay protected and mobile.</li></ol></div><div class="card"><h2>Ambush Plan A: Glow & Delete</h2><ol><li>Zo and Eilrys scout first.</li><li>Eilrys or Lixie casts Faerie Fire.</li><li>Zo Sneak Attacks with advantage.</li><li>Evangeline bursts the priority target.</li><li>Kenshi charges survivors.</li></ol></div></div><div class="grid grid2" style="margin-top:14px"><div class="card"><h2>Ambush Plan B: Root & Shoot</h2><ol><li>Lixie opens with Entangle.</li><li>Eilrys and Zo fire from range.</li><li>Evangeline slows or bursts.</li><li>Kenshi guards the edge and punishes escapees.</li></ol></div><div class="card"><h2>Campaign Memory</h2><p>Use Session Tools to track NPCs, locations, party inventory, DM questions, and session summaries so details do not get lost between notebooks.</p><div class="goodbox"><b>Tip:</b> Pick one person as the party archivist, then everyone can compare notes after each session.</div></div></div>`;
 document.getElementById('characters').innerHTML=`<input class="search" id="search" placeholder="Search spell, skill, character, role..." oninput="filterChars()"> <div class="grid">${party.map(charCard).join('')}</div>`;
 function filterChars(){const q=document.getElementById('search').value.toLowerCase();document.querySelectorAll('.char').forEach(c=>c.style.display=c.dataset.search.includes(q)?'block':'none')}
 document.getElementById('turn').innerHTML=`
@@ -205,7 +211,47 @@ document.getElementById('spellbook').innerHTML=`
 ${spellbook.map(group=>`<div class="card characterBlock theme-${group.theme}"><h2>${group.owner}</h2><div class="spellGrid">${group.spells.map(spellCard).join('')}</div></div>`).join('')}
 <div class="card characterBlock"><h2>Zo Spell Note</h2><p>Zo does not currently use spells. Zo’s “magic” is skill: Perception, Persuasion, scouting, positioning, and Sneak Attack timing.</p></div>`;
 
-document.getElementById('tools').innerHTML=`<div class="grid grid2"><div class="card"><h2>Initiative Tracker</h2><div class="toolRow"><input id="initName" placeholder="Name"><input id="initVal" placeholder="Initiative"></div><button class="primary" onclick="addInit()">Add</button><ol id="initList"></ol></div><div class="card"><h2>Loot Tracker</h2><div class="toolRow"><input id="lootItem" placeholder="Gold, item, clue, potion..."></div><button class="primary" onclick="addLoot()">Add Loot</button><ul id="lootList"></ul></div><div class="card"><h2>Session Notes</h2><textarea id="notes" placeholder="Type notes here. They save on this device only."></textarea><div class="toolRow"><button class="primary" onclick="save('notes','notes')">Save Notes</button><button class="ghost" onclick="load('notes','notes')">Load Notes</button><button class="ghost danger" onclick="localStorage.removeItem('notes');notes.value=''">Clear</button></div></div><div class="card"><h2>Quest Log</h2><textarea id="quests" placeholder="Active quests, NPC names, mysteries..."></textarea><div class="toolRow"><button class="primary" onclick="save('quests','quests')">Save Quests</button><button class="ghost" onclick="load('quests','quests')">Load Quests</button><button class="ghost danger" onclick="localStorage.removeItem('quests');quests.value=''">Clear</button></div></div></div>`;
+document.getElementById('tools').innerHTML=`
+<div class="card">
+  <h2>Campaign Hub</h2>
+  <p class="mini">These tools save only on the device/browser being used. They are perfect for personal tracking or for one chosen party archivist. They do not sync automatically across players.</p>
+  <div class="callout"><b>Best use:</b> after each session, compare notebooks and let one person update the master version or keep the cleanest record.</div>
+</div>
+
+<div class="grid grid2" style="margin-top:14px">
+  <div class="card"><h2>Campaign Progress</h2><textarea id="progress" class="tinyInput" placeholder="Party Level: 1&#10;Sessions Played: 0&#10;Current Objective: TBD"></textarea><div class="toolRow"><button class="primary" onclick="save('progress','progress');syncHomeProgress()">Save Progress</button><button class="ghost" onclick="load('progress','progress');syncHomeProgress()">Load Progress</button><button class="ghost danger" onclick="localStorage.removeItem('progress');progress.value='';syncHomeProgress()">Clear</button></div><p class="campaignTip">Use this for party level, session count, current objective, and big milestones.</p></div>
+  <div class="card"><h2>Session Journal</h2><textarea id="journal" placeholder="Session 1 - Met the mayor, found a strange symbol, accepted the missing caravan quest."></textarea><div class="toolRow"><button class="primary" onclick="save('journal','journal')">Save Journal</button><button class="ghost" onclick="load('journal','journal')">Load Journal</button><button class="ghost danger" onclick="localStorage.removeItem('journal');journal.value=''">Clear</button></div><p class="campaignTip">Short recaps are enough. Future you will be grateful.</p></div>
+</div>
+
+<div class="grid grid2" style="margin-top:14px">
+  <div class="card"><h2>Initiative Tracker</h2><div class="toolRow"><input id="initName" placeholder="Name"><input id="initVal" placeholder="Initiative"></div><button class="primary" onclick="addInit()">Add</button><ol id="initList"></ol></div>
+  <div class="card"><h2>Quick Loot Tracker</h2><div class="toolRow"><input id="lootItem" placeholder="Gold, item, clue, potion..."></div><button class="primary" onclick="addLoot()">Add Loot</button><ul id="lootList"></ul><p class="campaignTip">Temporary combat/session loot. Move important items to Party Treasury later.</p></div>
+</div>
+
+<div class="grid grid2" style="margin-top:14px">
+  <div class="card"><h2>Party Treasury / Shared Loot</h2><textarea id="treasury" placeholder="Party Fund: 0 GP&#10;Healing Potion x2 - holder TBD&#10;Silver Ring - Zo&#10;Mystery Key - Kenshi"></textarea><div class="toolRow"><button class="primary" onclick="save('treasury','treasury')">Save Treasury</button><button class="ghost" onclick="load('treasury','treasury')">Load Treasury</button><button class="ghost danger" onclick="localStorage.removeItem('treasury');treasury.value=''">Clear</button></div><p class="campaignTip">Track who is holding important items so they do not disappear into “someone’s bag.”</p></div>
+  <div class="card"><h2>Quest Log</h2><textarea id="quests" placeholder="Active quests, NPC names, mysteries..."></textarea><div class="toolRow"><button class="primary" onclick="save('quests','quests')">Save Quests</button><button class="ghost" onclick="load('quests','quests')">Load Quests</button><button class="ghost danger" onclick="localStorage.removeItem('quests');quests.value=''">Clear</button></div></div>
+</div>
+
+<div class="grid grid2" style="margin-top:14px">
+  <div class="card"><h2>NPC Directory</h2><textarea id="npcs" placeholder="Name - relationship - location - why they matter&#10;Example: Mayor Thornwick - friendly - Oakvale - gave missing caravan quest"></textarea><div class="toolRow"><button class="primary" onclick="save('npcs','npcs')">Save NPCs</button><button class="ghost" onclick="load('npcs','npcs')">Load NPCs</button><button class="ghost danger" onclick="localStorage.removeItem('npcs');npcs.value=''">Clear</button></div><p class="campaignTip">Write down names immediately. NPC names are the first thing groups forget.</p></div>
+  <div class="card"><h2>Places Visited</h2><textarea id="places" placeholder="Place - status - notes&#10;Example: Goblin Cave - cleared - found claw marks near altar"></textarea><div class="toolRow"><button class="primary" onclick="save('places','places')">Save Places</button><button class="ghost" onclick="load('places','places')">Load Places</button><button class="ghost danger" onclick="localStorage.removeItem('places');places.value=''">Clear</button></div><p class="campaignTip">Useful for towns, caves, ruins, forests, roads, shops, temples, and “we need to come back later” spots.</p></div>
+</div>
+
+<div class="grid grid2" style="margin-top:14px">
+  <div class="card"><h2>DM Questions</h2><textarea id="dmquestions" placeholder="Can Thorn Whip pull someone off a cliff?&#10;How does surprise work in our game?&#10;What was the symbol on the wall?"></textarea><div class="toolRow"><button class="primary" onclick="save('dmquestions','dmquestions')">Save Questions</button><button class="ghost" onclick="load('dmquestions','dmquestions')">Load Questions</button><button class="ghost danger" onclick="localStorage.removeItem('dmquestions');dmquestions.value=''">Clear</button></div><p class="campaignTip">Use this for rules questions, story mysteries, and things to ask between sessions.</p></div>
+  <div class="card"><h2>Session Notes</h2><textarea id="notes" placeholder="Type notes here. They save on this device only."></textarea><div class="toolRow"><button class="primary" onclick="save('notes','notes')">Save Notes</button><button class="ghost" onclick="load('notes','notes')">Load Notes</button><button class="ghost danger" onclick="localStorage.removeItem('notes');notes.value=''">Clear</button></div></div>
+</div>`;
+function syncHomeProgress(){
+  const text=(localStorage.getItem('progress')||document.getElementById('progress')?.value||'');
+  const sessionMatch=text.match(/Sessions Played:\s*([^\n]+)/i);
+  const objectiveMatch=text.match(/Current Objective:\s*([^\n]+)/i);
+  const sessionEl=document.getElementById('sessionCount');
+  const objectiveEl=document.getElementById('homeObjective');
+  if(sessionEl) sessionEl.textContent=sessionMatch?sessionMatch[1].trim():'0';
+  if(objectiveEl) objectiveEl.textContent=objectiveMatch?objectiveMatch[1].trim():'TBD';
+}
+
 document.getElementById('rules').innerHTML=`
 <div class="grid grid2">
   <div class="card"><h2>New to D&D? Study This First</h2><ol><li><b>Action:</b> your main thing: Attack, Cast a Spell, Dash, Dodge, Help, Hide, Search, or Disengage.</li><li><b>Bonus Action:</b> only if something says it uses one, like Hunter’s Mark, Healing Word, Telekinetic Shove, or some features.</li><li><b>Movement:</b> you can move before and after your action.</li><li><b>Reaction:</b> one response outside your turn, often Opportunity Attack or Absorb Elements.</li><li><b>Concentration:</b> only one concentration spell at a time.</li></ol></div>
@@ -221,7 +267,7 @@ document.getElementById('rules').innerHTML=`
   <div class="card"><h2>Useful Conditions</h2><ul><li><b>Restrained:</b> movement becomes 0; attacks against them are easier.</li><li><b>Prone:</b> melee attacks against them are easier; ranged attacks are harder.</li><li><b>Grappled:</b> movement becomes 0.</li><li><b>Invisible:</b> harder to target.</li><li><b>Charmed:</b> affects social/control situations.</li><li><b>Frightened:</b> makes it harder for enemies to approach or attack well.</li></ul></div>
 </div>
 <div class="card" style="margin-top:14px"><h2>Table Reminder</h2><div class="goodbox"><b>Good teamwork beats perfect rules knowledge.</b> Tell the group what you are trying to do, ask who needs help, and focus one enemy at a time.</div></div>`;
-load('notes','notes');load('quests','quests');
+load('notes','notes');load('quests','quests');load('progress','progress');load('journal','journal');load('treasury','treasury');load('npcs','npcs');load('places','places');load('dmquestions','dmquestions');syncHomeProgress();
 </script>
 </body>
 </html>
